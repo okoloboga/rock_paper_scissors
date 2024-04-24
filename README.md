@@ -9,3 +9,5 @@ In Account menu players can look at their stats: Total Games, Wins, Lose, Rating
 For every referral player got +1 bonus jettons for win. Player can withdraw jettons to TON wallet. Jettons name - AZOTH. 
 Minimal limit for Withdraw - 50 jettons. For Withdraw player need to input address of destination wallet.
 Aslo player can import jettons from TON wallet. For that - he have to connect wallet by Mnemonics. Yes, it is not so safe, and it will be fixed. 
+
+Game translated to English, Russian and Chinese
