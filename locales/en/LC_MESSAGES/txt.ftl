@@ -4,9 +4,6 @@ start =  <b>Hello!</b>
          If you suddenly forgot the rules
          the /help command will help you!
 
-         Press 🎲<b>Play</b>🎲 to find your opponent
-         Or look at your 🪙<b>Account</b>🪙
-
          You can invite your friends to the game!
          They just need to enter your <b>REFCODE</b> in the menu
          🪙<b>Account</b>🪙
@@ -14,6 +11,8 @@ start =  <b>Hello!</b>
          1 AZOTH more!
          After the invitation, you and your friend will receive 10 AZOTH
          per game account.
+chose-action = Press 🎲<b>Play</b>🎲 to find your opponent
+               Or look at your 🪙<b>Account</b>🪙
 help = This is a very simple game. Players must simultaneously
        make a choice of one of three items. Stone
        scissors or paper.
@@ -68,7 +67,7 @@ cant-invited-by-invited = You cannot use the invitation
 you-first = Nobody created the game
             Be the first to start!
 select-enemy = Select your opponent
-
+game-confirm = Enemy founded!
 rules = The game goes until 2 losses.
         If you refuse to play, it will be considered a loss!
 
@@ -81,7 +80,7 @@ you-leaved = You have left the game!
              You've been given a loss
 enemy-leaved = Your opponent has left the game!
                Your victory is counted
-enemy-leaved-ok = Great!
+great = Great!
 nobody-won = Draw! Go again
 choice-made = Choice made! We are waiting for an opponent...
 choice-waiting = Still waiting for our opponent...

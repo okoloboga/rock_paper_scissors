@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-
+from redis import asyncio as aioredis
 from fluentogram import TranslatorRunner
 
 from keyboards.keyboards import back_kb, import_export_kb, play_account_kb, digit_inline
@@ -19,9 +19,10 @@ router = Router()
 # IMPORT button pressing
 @router.callback_query(F.data == 'import')
 async def process_import_button(callback: CallbackQuery, state: FSMContext, i18n: TranslatorRunner):
-
+    r = aioredis.Redis(host='localhost', port=6379)
+    user = await r.hgetall(str(callback.from_user.id))
     # Create new local wallet
-    if users_db[callback.from_user.id]['wallet']['export_address'] is None:
+    if user[b'export_address'] == b'o':
         try:
             await callback.message.edit_text(text=i18n.new.wallet(),
                                              reply_markup=back_kb(i18n))
@@ -42,9 +43,10 @@ async def process_import_button(callback: CallbackQuery, state: FSMContext, i18n
 # EXPORT button pressing
 @router.callback_query(F.data == 'export')
 async def process_export_button(callback: CallbackQuery, state: FSMContext, i18n: TranslatorRunner):
-
+    r = aioredis.Redis(host='localhost', port=6379)
+    user = await r.hgetall(str(callback.from_user.id))
     # Need to add new wallet
-    if users_db[callback.from_user.id]['wallet']['mnemonics'] is None:
+    if user[b'mnemonics'] == b'0':
         try:
             await callback.message.edit_text(text=i18n.new.wallet(),
                                              reply_markup=back_kb(i18n))
@@ -68,7 +70,10 @@ async def process_export_button(callback: CallbackQuery, state: FSMContext, i18n
 # User enter wallet address
 @router.message(IsWallet(), StateFilter(FSMMain.new_address))
 async def process_address_input(message: Message, state: FSMContext, i18n: TranslatorRunner):
-    users_db[message.from_user.id]['wallet']['address'] = message.text
+    r = aioredis.Redis(host='localhost', port=6379)
+    user = await r.hgetall(str(message.from_user.id))
+    user[b'export_address'] = message.text
+    await r.hmset(str(message.from_user.id), user)
     await message.answer(text=i18n.new.mnemonics(),
                          reply_markup=back_kb(i18n))
     await state.set_state(FSMMain.new_mnemonics)
@@ -84,7 +89,10 @@ async def process_wrong_address_input(message: Message, i18n: TranslatorRunner):
 # User enter
 @router.message(IsMnemonics(), StateFilter(FSMMain.new_mnemonics))
 async def process_mnemonics_input(message: Message, state: FSMContext, i18n: TranslatorRunner):
-    users_db[message.from_user.id]['wallet']['mnemonics'] = message.text.split()
+    r = aioredis.Redis(host='localhost', port=6379)
+    user = await r.hgetall(str(message.from_user.id))
+    user[b'mnemonics'] = message.text.split()
+    await r.hmset(str(message.from_user.id), user)
     await message.answer(text=i18n.wallet.added(),
                          reply_markup=import_export_kb(i18n))
     await state.clear()
@@ -184,10 +192,12 @@ async def process_enter_input_value(callback: CallbackQuery, state: FSMContext, 
 # Value of jettons entered in jettons EXPORT
 @router.callback_query(F.data == 'ok', StateFilter(FSMMain.jettons_export))
 async def process_enter_export_value(callback: CallbackQuery, state: FSMContext, i18n: TranslatorRunner):
+    r = aioredis.Redis(host='localhost', port=6379)
+    user = await r.hgetall(str(callback.from_user.id))
     value = int((await state.get_data())['price'])
 
     # User hasnt so muck jettons
-    if value > users_db[callback.from_user.id]['jettons']:
+    if value > int(str(user[b'jettons'], encoding='utf-8')):
         try:
             await callback.message.edit_text(text=i18n.notenough(),
                                              reply_markup=back_kb(i18n))
@@ -226,10 +236,14 @@ async def process_wrong_value(callback: CallbackQuery, i18n: TranslatorRunner):
 # Jettons IMPORT confirm
 @router.callback_query(IsImport(), StateFilter(FSMMain.confirm_import))
 async def process_confirm_import(callback: CallbackQuery, state: FSMContext, i18n: TranslatorRunner):
+    r = aioredis.Redis(host='localhost', port=6379)
+
+    # Vars initialization
+    user = await r.hgetall(str(callback.from_user.id))
     space = callback.data.find(' ')
     value = int(callback.data[space+1:])
-    mnemonics = users_db[callback.from_user.id]['wallet']['mnemonics']
-    balance = await check_balance(users_db[callback.from_user.id]['wallet']['address'])
+    mnemonics = str(user[b'mnemonics'], encodings='utf-8')
+    balance = await check_balance(str(user[b'export_address'], encodings='utf-8'))
 
     # Need TONs for fee
     if balance < 100000000:
@@ -243,7 +257,8 @@ async def process_confirm_import(callback: CallbackQuery, state: FSMContext, i18
             await jetton_import(mnemonics, value)
             await callback.message.edit_text(text=i18n.importcomplete(),
                                              reply_markup=play_account_kb(i18n))
-            users_db[callback.from_user.id]['jettons'] += value
+            user[b'jettons'] = int(str(user[b'jettons'], encoding='utf-8'))+ value
+            await r.hmset(str(callback.from_user.id), user)
             await state.clear()
         except:
             await callback.message.edit_text(text=i18n.ERROR(),
@@ -254,14 +269,19 @@ async def process_confirm_import(callback: CallbackQuery, state: FSMContext, i18
 # Jettons EXPORT confirm
 @router.callback_query(IsExport(), StateFilter(FSMMain.confirm_export))
 async def procces_confirm_import(callback: CallbackQuery, state: FSMContext, i18n: TranslatorRunner):
+    r = aioredis.Redis(host='localhost', port=6379)
+
+    # Vars initialization
+    user = await r.hgetall(str(callback.from_user.id))
     space = callback.data.find(' ')
     value = int(callback.data[space+1:])
-    address = users_db[callback.from_user.id]['wallet']['address']
+    address = str(user[b'address'], encoding='utf-8')
     try:
         await jetton_export(address, value)
         await callback.message.edit_text(text=i18n.exportcomplete(),
                                          reply_markup=play_account_kb(i18n))
-        users_db[callback.from_user.id]['jettons'] -= value
+        user[b'jettons'] = int(str(user[b'jettons'], encoding='utf-8'))+ value
+        await r.hmset(str(callback.from_user.id), user)
         await state.clear()
     except:
         await callback.message.edit_text(text=i18n.ERROR(),

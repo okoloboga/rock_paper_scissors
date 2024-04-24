@@ -49,12 +49,17 @@ def create_join_kb(i18n: TranslatorRunner):
 def select_enemy(rooms: dict, i18n: TranslatorRunner) -> InlineKeyboardMarkup:
     button_back = InlineKeyboardButton(text=i18n.back(),
                                        callback_data='back')
-    buttons_enemy: list[list[InlineKeyboardButton]] = [
-        [InlineKeyboardButton(text=i18n.button.rooms(user_id=rooms[key]['user_id'],
-                                                     bet=rooms[key]['bet']),
-                              callback_data=(str(rooms[key]['user_id']) + ' ' + str(rooms[key]['bet']))) for key, value in rooms.items()],
-        [button_back]]
-    return InlineKeyboardMarkup(inline_keyboard=buttons_enemy)
+    buttons_enemy: list[InlineKeyboardButton] = [
+        InlineKeyboardButton(text=i18n.button.rooms(user_id=key[2:], bet=value),
+                             callback_data=(str(key[2:] + ' ' + value))) for key, value in rooms.items()]
+    return InlineKeyboardMarkup(inline_keyboard=[buttons_enemy, [button_back]])
+
+
+# Confirming game with joined enemy
+def game_confirm(i18n: TranslatorRunner):
+    button_confirm = InlineKeyboardButton(text=i18n.great(),
+                                          callback_data='game_confirm')
+    return InlineKeyboardMarkup(inline_keyboard=[[button_confirm]])
 
 
 # Main game keyboard
@@ -72,7 +77,7 @@ def game_process_kb(i18n: TranslatorRunner):
 
 # Confirm leaved enemy
 def enemy_leaved_ok(i18n: TranslatorRunner):
-    button_ok = InlineKeyboardButton(text=i18n.enemy.leaved.ok(),
+    button_ok = InlineKeyboardButton(text=i18n.great(),
                                      callback_data='back')
     return InlineKeyboardMarkup(inline_keyboard=[[button_ok]])
 
@@ -93,7 +98,8 @@ def bet_kb(i18n: TranslatorRunner):
                                      callback_data='b25')
     button_back = InlineKeyboardButton(text=i18n.back(),
                                        callback_data='back')
-    return  InlineKeyboardMarkup(inline_keyboard=[[button_1, button_2, button_3, button_4], [button_5, button_25], [button_back]])
+    return InlineKeyboardMarkup(
+        inline_keyboard=[[button_1, button_2, button_3, button_4], [button_5, button_25], [button_back]])
 
 
 # Enter jettons value

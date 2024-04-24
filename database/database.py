@@ -5,13 +5,12 @@ new_user = {
             'lose': 0,
             'rating': 0,
             'jettons': 15,
-            'referrals': [],
-            'invited': False,
-            'current_game': None,
-            'wallet': {
-                       'export_address': None,
-                       'mnemonics': None
-                       }
+            'referrals': 0,
+            'invited': 0,
+            'current_game': 0,
+            'last_message': 0,
+            'export_address': 0,
+            'mnemonics': 0
             }
 
 users_db = {}
