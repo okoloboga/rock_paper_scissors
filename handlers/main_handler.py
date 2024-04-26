@@ -47,8 +47,8 @@ async def process_back_waiting_button(callback: CallbackQuery, state: FSMContext
         user = await r.hgetall(str(callback.from_user.id))
         user[b'current_game'] = 0
         await r.hmset(str(callback.from_user.id), user)
-        if callback.from_user.id in rooms:
-            del rooms[callback.from_user.id]
+        if await r.exists("r_" + str(callback.from_user.id)) != 0:
+            await r.delete("r_" + str(callback.from_user.id))
     except TelegramBadRequest:
         await callback.answer()
     await state.clear()

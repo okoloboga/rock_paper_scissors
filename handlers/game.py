@@ -83,6 +83,7 @@ async def process_game_button(callback: CallbackQuery, bot: Bot, state: FSMConte
             msg = await bot.send_message(enemy_id, text=i18n.you.damaged(),
                                          reply_markup=game_process_kb(i18n))
             enemy[b'last_message'] = msg.message_id
+            await bot.delete_message(enemy_id, msg.message_id - 1)
             game[enemy_am + b'_health'] = int(str(game[enemy_am + b'_health'], encoding='utf-8')) - 1
         elif result == 'enemy_caused_damaged':
             try:
@@ -96,6 +97,7 @@ async def process_game_button(callback: CallbackQuery, bot: Bot, state: FSMConte
             msg = await bot.send_message(enemy_id, text=i18n.enemy.damaged(),
                                          reply_markup=game_process_kb(i18n))
             enemy[b'last_message'] = msg.message_id
+            await bot.delete_message(enemy_id, msg.message_id - 1)
             game[i_am + b'_health'] = int(str(game[i_am + b'_health'], encoding='utf-8')) - 1
         elif result == 'nobody_won':
             try:
@@ -108,6 +110,7 @@ async def process_game_button(callback: CallbackQuery, bot: Bot, state: FSMConte
             msg = await bot.send_message(enemy_id, text=i18n.nobody.won(),
                                          reply_markup=game_process_kb(i18n))
             enemy[b'last_message'] = msg.message_id
+            await bot.delete_message(enemy_id, msg.message_id - 1)
         game[b'player1_move'] = b'0'
         game[b'player2_move'] = b'0'
         await r.hmset(enemy_id, enemy)
@@ -179,7 +182,7 @@ async def process_game_button(callback: CallbackQuery, bot: Bot, state: FSMConte
                                              reply_markup=play_account_kb(i18n))
                 await bot.delete_message(enemy_id, msg.message_id - 1)
                 # Counting total wins, loses, games, jettons
-                await game_result(total_result, str(message.from_user.id), enemy_id, room_id, msg.message_id)
+                await game_result(total_result, str(callback.from_user.id), enemy_id, room_id, msg.message_id)
             await state.clear()
     else:
         # Suggest you wait

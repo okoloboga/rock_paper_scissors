@@ -49,10 +49,14 @@ def create_join_kb(i18n: TranslatorRunner):
 def select_enemy(rooms: dict, i18n: TranslatorRunner) -> InlineKeyboardMarkup:
     button_back = InlineKeyboardButton(text=i18n.back(),
                                        callback_data='back')
-    buttons_enemy: list[InlineKeyboardButton] = [
-        InlineKeyboardButton(text=i18n.button.rooms(user_id=key[2:], bet=value),
-                             callback_data=(str(key[2:] + ' ' + value))) for key, value in rooms.items()]
-    return InlineKeyboardMarkup(inline_keyboard=[buttons_enemy, [button_back]])
+    buttons_enemy = []
+    print(rooms)
+    for key in rooms:
+        buttons_enemy.append(
+            [InlineKeyboardButton(text=i18n.button.rooms(user_id=key[2:], bet=rooms[key]),
+                                  callback_data=(str(key[2:] + ' ' + rooms[key])))])
+    buttons_enemy.append([button_back])
+    return InlineKeyboardMarkup(inline_keyboard=buttons_enemy)
 
 
 # Confirming game with joined enemy

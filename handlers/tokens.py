@@ -22,7 +22,7 @@ async def process_import_button(callback: CallbackQuery, state: FSMContext, i18n
     r = aioredis.Redis(host='localhost', port=6379)
     user = await r.hgetall(str(callback.from_user.id))
     # Create new local wallet
-    if user[b'export_address'] == b'o':
+    if user[b'export_address'] == b'0':
         try:
             await callback.message.edit_text(text=i18n.new.wallet(),
                                              reply_markup=back_kb(i18n))
@@ -91,7 +91,7 @@ async def process_wrong_address_input(message: Message, i18n: TranslatorRunner):
 async def process_mnemonics_input(message: Message, state: FSMContext, i18n: TranslatorRunner):
     r = aioredis.Redis(host='localhost', port=6379)
     user = await r.hgetall(str(message.from_user.id))
-    user[b'mnemonics'] = message.text.split()
+    user[b'mnemonics'] = message.text
     await r.hmset(str(message.from_user.id), user)
     await message.answer(text=i18n.wallet.added(),
                          reply_markup=import_export_kb(i18n))
@@ -242,8 +242,8 @@ async def process_confirm_import(callback: CallbackQuery, state: FSMContext, i18
     user = await r.hgetall(str(callback.from_user.id))
     space = callback.data.find(' ')
     value = int(callback.data[space+1:])
-    mnemonics = str(user[b'mnemonics'], encodings='utf-8')
-    balance = await check_balance(str(user[b'export_address'], encodings='utf-8'))
+    mnemonics = str(user[b'mnemonics'], encoding='utf-8').split()
+    balance = await check_balance(str(user[b'export_address'], encoding='utf-8'))
 
     # Need TONs for fee
     if balance < 100000000:
@@ -257,7 +257,7 @@ async def process_confirm_import(callback: CallbackQuery, state: FSMContext, i18
             await jetton_import(mnemonics, value)
             await callback.message.edit_text(text=i18n.importcomplete(),
                                              reply_markup=play_account_kb(i18n))
-            user[b'jettons'] = int(str(user[b'jettons'], encoding='utf-8'))+ value
+            user[b'jettons'] = int(str(user[b'jettons'], encoding='utf-8')) + value
             await r.hmset(str(callback.from_user.id), user)
             await state.clear()
         except:
@@ -275,12 +275,12 @@ async def procces_confirm_import(callback: CallbackQuery, state: FSMContext, i18
     user = await r.hgetall(str(callback.from_user.id))
     space = callback.data.find(' ')
     value = int(callback.data[space+1:])
-    address = str(user[b'address'], encoding='utf-8')
+    address = str(user[b'export_address'], encoding='utf-8')
     try:
         await jetton_export(address, value)
         await callback.message.edit_text(text=i18n.exportcomplete(),
                                          reply_markup=play_account_kb(i18n))
-        user[b'jettons'] = int(str(user[b'jettons'], encoding='utf-8'))+ value
+        user[b'jettons'] = int(str(user[b'jettons'], encoding='utf-8')) - value
         await r.hmset(str(callback.from_user.id), user)
         await state.clear()
     except:
