@@ -1,8 +1,6 @@
 start =  <b>Hello!</b>
          Let's play a game with you
          "Rock Paper Scissors"?
-         If you suddenly forgot the rules
-         the /help command will help you!
 
          You can invite your friends to the game!
          They just need to enter your <b>REFCODE</b> in the menu

@@ -14,6 +14,7 @@ from states.states import FSMMain
 
 router = Router()
 
+
 # START command
 @router.message(CommandStart(), StateFilter(default_state))
 async def process_start_command(message: Message, i18n: TranslatorRunner):
@@ -27,13 +28,6 @@ async def process_start_command(message: Message, i18n: TranslatorRunner):
     await message.answer(text=i18n.chose.action(),
                          reply_markup=play_account_kb(i18n))
 
-
-
-# HELP command
-@router.message(Command(commands='help'))
-async def process_help_command(message: Message, i18n: TranslatorRunner):
-    await message.answer(text=i18n.help(),
-                         reply_markup=play_account_kb(i18n))
 
 
 # Canceling anything in states
