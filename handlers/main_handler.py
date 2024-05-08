@@ -1,5 +1,5 @@
-from aiogram import F, Router, Bot
-from aiogram.filters import Command, CommandStart, StateFilter
+from aiogram import F, Router
+from aiogram.filters import CommandStart, StateFilter
 from aiogram.fsm.state import default_state
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message, FSInputFile
@@ -8,7 +8,7 @@ from fluentogram import TranslatorRunner
 from redis import asyncio as aioredis
 
 from keyboards.keyboards import create_join_kb, play_account_kb, import_export_kb, back_kb
-from database.database import users_db, new_user, rooms
+from database.database import new_user
 from filters.filters import IsReferral
 from states.states import FSMMain
 
@@ -27,7 +27,6 @@ async def process_start_command(message: Message, i18n: TranslatorRunner):
                                caption=i18n.start())
     await message.answer(text=i18n.chose.action(),
                          reply_markup=play_account_kb(i18n))
-
 
 
 # Canceling anything in states
@@ -57,7 +56,6 @@ async def process_play_button(callback: CallbackQuery, state: FSMContext, i18n: 
         await state.clear()
     except TelegramBadRequest:
         await callback.answer()
-
 
 
 # ACCOUNT button pressing

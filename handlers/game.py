@@ -1,3 +1,5 @@
+import asyncio
+
 from aiogram import F, Router, Bot
 from aiogram.types import CallbackQuery, Message
 from aiogram.fsm.context import FSMContext
@@ -16,6 +18,8 @@ router = Router()
 # Room owner confirmed game
 @router.callback_query(F.data == 'game_confirm', StateFilter(FSMMain.wait_game))
 async def process_game_confirm_button(callback: CallbackQuery, state: FSMContext, bot: Bot, i18n: TranslatorRunner):
+
+    await asyncio.sleep(2)
     r = aioredis.Redis(host='localhost', port=6379)
 
     # Removing keyboard of last message

@@ -8,7 +8,6 @@ from redis import asyncio as aioredis
 from fluentogram import TranslatorRunner
 
 from keyboards.keyboards import back_kb, import_export_kb, play_account_kb, digit_inline
-from database.database import users_db
 from states.states import FSMMain
 from filters.filters import IsWallet, IsMnemonics, IsImport, IsExport
 from services.ton_services import jetton_import, jetton_export, check_balance
