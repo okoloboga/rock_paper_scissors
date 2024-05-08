@@ -84,7 +84,7 @@ async def process_account_button(callback: CallbackQuery, state: FSMContext, i18
 @router.callback_query(F.data == 'get_refcode')
 async def process_get_refcode_button(callback: CallbackQuery, i18n: TranslatorRunner):
     try:
-        await callback.message.edit_text(text=f'{hex(callback.from_user.id)}',
+        await callback.message.edit_text(text=f'<code>{hex(callback.from_user.id)}</code>',
                                          reply_markup=import_export_kb(i18n))
     except TelegramBadRequest:
         await callback.answer()
